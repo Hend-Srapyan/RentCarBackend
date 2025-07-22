@@ -1,0 +1,43 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="004_create_booking_table" author="Hend Srapyan">
+        <createTable tableName="booking">
+            <column name="id" autoIncrement="true" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customer_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vehicle_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_from" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_to" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="enum('ACTIVE','COMPLETED','CANCELLED')">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="booking"
+                baseColumnNames="vehicle_id"
+                constraintName="fk_booking_vehicle"
+                referencedTableName="vehicle"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+        <addForeignKeyConstraint
+                baseTableName="booking"
+                baseColumnNames="customer_id"
+                constraintName="fk_booking_customer"
+                referencedTableName="customer"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>
