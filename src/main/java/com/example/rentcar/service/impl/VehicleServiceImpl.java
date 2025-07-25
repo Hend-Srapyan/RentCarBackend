@@ -10,11 +10,12 @@ import com.example.rentcar.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +28,8 @@ public class VehicleServiceImpl implements VehicleService {
     private String uploadPath;
 
     @Override
-    public List<VehicleDto> findAll() {
-        List<Vehicle> vehicles = vehicleRepository.findAll();
-        return vehicleMapper.toDtoList(vehicles);
+    public Page<VehicleDto> findAll(Pageable pageable) {
+        return vehicleRepository.findAll(pageable).map(vehicleMapper::toDto);
     }
 
     @SneakyThrows

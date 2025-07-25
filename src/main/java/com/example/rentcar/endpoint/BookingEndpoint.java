@@ -6,11 +6,11 @@ import com.example.rentcar.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,8 +20,8 @@ public class BookingEndpoint {
     private final BookingService bookingService;
 
     @GetMapping("/bookings")
-    public ResponseEntity<List<BookingDto>> getAllBookings() {
-        return ResponseEntity.ok(bookingService.findAll());
+    public ResponseEntity<Page<BookingDto>> getAllBookings(Pageable pageable) {
+        return ResponseEntity.ok(bookingService.findAll(pageable));
     }
 
     @PostMapping("/bookings")

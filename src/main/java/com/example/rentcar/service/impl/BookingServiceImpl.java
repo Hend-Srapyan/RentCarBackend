@@ -8,6 +8,8 @@ import com.example.rentcar.mapper.BookingMapper;
 import com.example.rentcar.repository.BookingRepository;
 import com.example.rentcar.service.BookingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +25,11 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> findAll() {
         List<Booking> bookings = bookingRepository.findAll();
         return bookingMapper.toDtoList(bookings);
+    }
+
+    @Override
+    public Page<BookingDto> findAll(Pageable pageable) {
+        return bookingRepository.findAll(pageable).map(bookingMapper::toDto);
     }
 
     @Override
