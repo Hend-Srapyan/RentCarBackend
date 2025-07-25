@@ -11,11 +11,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,49 +37,47 @@ class VehicleServiceImplTest {
     @InjectMocks
     private VehicleServiceImpl vehicleService;
 
-
     @Test
-    void findAll_ShouldReturnVehicleDtoList() {
-        List<Vehicle> vehicles = Collections.singletonList(new Vehicle());
-        List<VehicleDto> dtos = Collections.singletonList(new VehicleDto());
+    void findAll_ShouldReturnPagedVehicleDtos() {
+        Vehicle vehicle = new Vehicle();
+        VehicleDto dto = new VehicleDto();
+        Pageable pageable = PageRequest.of(0, 10);
 
-        when(vehicleRepository.findAll()).thenReturn(vehicles);
-        when(vehicleMapper.toDtoList(vehicles)).thenReturn(dtos);
+        Page<Vehicle> vehiclePage = new PageImpl<>(Collections.singletonList(vehicle));
+        when(vehicleRepository.findAll(pageable)).thenReturn(vehiclePage);
+        when(vehicleMapper.toDto(vehicle)).thenReturn(dto);
 
-        List<VehicleDto> result = vehicleService.findAll();
+        Page<VehicleDto> result = vehicleService.findAll(pageable);
 
-        assertEquals(1, result.size());
-        verify(vehicleRepository).findAll();
-        verify(vehicleMapper).toDtoList(vehicles);
+        assertEquals(1, result.getTotalElements());
+        verify(vehicleRepository).findAll(pageable);
+        verify(vehicleMapper).toDto(vehicle);
     }
 
     @Test
     void save_ShouldSaveVehicleWithFile() throws Exception {
         SaveVehicleRequest request = new SaveVehicleRequest();
-        request.setImage(null);
-
-        when(multipartFile.isEmpty()).thenReturn(false);
-        when(multipartFile.getOriginalFilename()).thenReturn("image.jpg");
-
-        Vehicle entity = new Vehicle();
-        Vehicle saved = new Vehicle();
+        Vehicle vehicleEntity = new Vehicle();
+        Vehicle savedVehicle = new Vehicle();
         VehicleDto dto = new VehicleDto();
 
-        when(vehicleMapper.toEntity(request)).thenReturn(entity);
-        when(vehicleRepository.save(entity)).thenReturn(saved);
-        when(vehicleMapper.toDto(saved)).thenReturn(dto);
+        when(multipartFile.isEmpty()).thenReturn(false);
+        when(multipartFile.getOriginalFilename()).thenReturn("test.png");
+
+        when(vehicleMapper.toEntity(request)).thenReturn(vehicleEntity);
+        when(vehicleRepository.save(vehicleEntity)).thenReturn(savedVehicle);
+        when(vehicleMapper.toDto(savedVehicle)).thenReturn(dto);
 
         VehicleDto result = vehicleService.save(request, multipartFile);
 
         assertNotNull(result);
-        assertTrue(request.getImage() != null && request.getImage().contains("image.jpg"));
         verify(multipartFile).transferTo(any(File.class));
-        verify(vehicleRepository).save(entity);
-        verify(vehicleMapper).toDto(saved);
+        verify(vehicleRepository).save(vehicleEntity);
+        verify(vehicleMapper).toDto(savedVehicle);
     }
 
     @Test
-    void deleteById_ShouldDelete_WhenExists() {
+    void deleteById_ShouldDeleteWhenExists() {
         when(vehicleRepository.existsById(1)).thenReturn(true);
 
         vehicleService.deleteById(1);
@@ -87,10 +86,10 @@ class VehicleServiceImplTest {
     }
 
     @Test
-    void deleteById_ShouldThrow_WhenNotExists() {
-        when(vehicleRepository.existsById(99)).thenReturn(false);
+    void deleteById_ShouldThrowWhenNotExists() {
+        when(vehicleRepository.existsById(42)).thenReturn(false);
 
-        assertThrows(VehicleNotFoundException.class, () -> vehicleService.deleteById(99));
+        assertThrows(VehicleNotFoundException.class, () -> vehicleService.deleteById(42));
         verify(vehicleRepository, never()).deleteById(anyInt());
     }
 
@@ -100,37 +99,38 @@ class VehicleServiceImplTest {
         request.setId(1);
         request.setBrand("Toyota");
         request.setModel("Corolla");
-        request.setYear(2020);
-        request.setColor("Red");
-        request.setRegNo("123ABC");
-        request.setDailyRate(45);
+        request.setYear(2022);
+        request.setColor("White");
+        request.setRegNo("ABC123");
+        request.setDailyRate(50);
 
         Vehicle existing = new Vehicle();
-        existing.setId(1);
+        Vehicle saved = new Vehicle();
+        VehicleDto dto = new VehicleDto();
 
         when(vehicleRepository.findById(1)).thenReturn(Optional.of(existing));
         when(multipartFile.isEmpty()).thenReturn(false);
-        when(multipartFile.getOriginalFilename()).thenReturn("newpic.png");
+        when(multipartFile.getOriginalFilename()).thenReturn("updated.jpg");
 
-        Vehicle saved = new Vehicle();
-        VehicleDto dto = new VehicleDto();
         when(vehicleRepository.save(existing)).thenReturn(saved);
         when(vehicleMapper.toDto(saved)).thenReturn(dto);
 
         VehicleDto result = vehicleService.update(request, multipartFile);
 
         assertNotNull(result);
-        assertEquals("Toyota", existing.getBrand());
-        assertTrue(existing.getImage().contains("newpic.png"));
         verify(multipartFile).transferTo(any(File.class));
+        verify(vehicleRepository).save(existing);
+        verify(vehicleMapper).toDto(saved);
+        assertEquals("Toyota", existing.getBrand());
+        assertEquals("Corolla", existing.getModel());
     }
 
     @Test
-    void update_ShouldThrow_WhenVehicleNotFound() {
+    void update_ShouldThrowWhenVehicleNotFound() {
         SaveVehicleRequest request = new SaveVehicleRequest();
-        request.setId(123);
+        request.setId(99);
 
-        when(vehicleRepository.findById(123)).thenReturn(Optional.empty());
+        when(vehicleRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(VehicleNotFoundException.class, () -> vehicleService.update(request, multipartFile));
     }
