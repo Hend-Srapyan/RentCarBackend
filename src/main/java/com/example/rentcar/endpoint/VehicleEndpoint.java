@@ -26,7 +26,7 @@ public class VehicleEndpoint {
 
     private final VehicleService vehicleService;
 
-    @Value("C://Users//Hend//IdeaProjects//Rent-Car//upload")
+    @Value("${upload.path}")
     private String uploadPath;
 
     @GetMapping("/vehicles")

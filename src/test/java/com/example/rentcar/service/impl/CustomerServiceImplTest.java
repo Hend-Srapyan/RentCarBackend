@@ -11,16 +11,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 class CustomerServiceImplTest {
 
     @Mock
@@ -32,35 +35,20 @@ class CustomerServiceImplTest {
     @InjectMocks
     private CustomerServiceImpl customerService;
 
-    @Test
-    void findAll_ShouldReturnListOfCustomerDtos() {
-        Customer customer = new Customer();
-        CustomerDto dto = new CustomerDto();
-
-        when(customerRepository.findAll()).thenReturn(Collections.singletonList(customer));
-        when(customerMapper.toDtoList(anyList())).thenReturn(Collections.singletonList(dto));
-
-        List<CustomerDto> result = customerService.findAll();
-
-        assertEquals(1, result.size());
-        verify(customerRepository).findAll();
-        verify(customerMapper).toDtoList(anyList());
-    }
 
     @Test
-    void findAll_WithPageable_ShouldReturnPageOfCustomerDtos() {
-        Customer customer = new Customer();
-        CustomerDto dto = new CustomerDto();
-
+    void testFindAll() {
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Customer> customerPage = new PageImpl<>(Collections.singletonList(customer));
+        Customer customer = new Customer();
+        CustomerDto customerDto = new CustomerDto();
 
-        when(customerRepository.findAll(pageable)).thenReturn(customerPage);
-        when(customerMapper.toDto(customer)).thenReturn(dto);
+        when(customerRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(customer)));
+        when(customerMapper.toDto(customer)).thenReturn(customerDto);
 
         Page<CustomerDto> result = customerService.findAll(pageable);
 
         assertEquals(1, result.getTotalElements());
+        assertEquals(customerDto, result.getContent().get(0));
         verify(customerRepository).findAll(pageable);
         verify(customerMapper).toDto(customer);
     }

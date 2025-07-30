@@ -5,8 +5,13 @@ spring:
     url: jdbc:mysql://localhost:3306/rentcar?createDatabaseIfNotExist=true
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:root}
+
   liquibase:
     change-log: classpath:/db/changelog.xml
+
 jwt:
   secret: YXNkZmYkIyNzZFNEU0RBQVNERksjQEBkc2ZqZGZrZHNqQEAjZHNmZ2ZnZmdeXiYmWipeJSQkI2RzZHMkIyVzZDQ1MDk5KUkjJCg5V0ZTSUo=
   expiration: 600000
+
+upload:
+  path: C://Users//Hend//IdeaProjects//Rent-Car//upload

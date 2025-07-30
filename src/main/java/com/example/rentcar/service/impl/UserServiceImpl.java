@@ -44,7 +44,8 @@ public class UserServiceImpl implements UserService {
         Optional<User> byUsername = findByUsername(userAuthRequest.getUsername());
 
         if (byUsername.isEmpty()) {
-            throw new UsernameNotFoundException("Username with" +  userAuthRequest.getUsername() + " not found");
+            throw new UsernameNotFoundException("Username with " + userAuthRequest.getUsername() + " not found");
+
         }
 
         User user = byUsername.get();
@@ -57,7 +58,7 @@ public class UserServiceImpl implements UserService {
                     .build());
         }
 
-        throw new UsernameNotFoundException("Username with" +  userAuthRequest.getUsername() + " not found");
+        throw new UsernameNotFoundException("Username with " +  userAuthRequest.getUsername() + " not found");
     }
 
     @Override

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -22,18 +23,23 @@ public class BookingServiceImpl implements BookingService {
     private final BookingMapper bookingMapper;
 
     @Override
-    public List<BookingDto> findAll() {
-        List<Booking> bookings = bookingRepository.findAll();
-        return bookingMapper.toDtoList(bookings);
-    }
-
-    @Override
     public Page<BookingDto> findAll(Pageable pageable) {
         return bookingRepository.findAll(pageable).map(bookingMapper::toDto);
     }
 
     @Override
     public BookingDto save(SaveBookingRequest bookingRequest) {
+        int vehicleId = bookingRequest.getVehicle().getId();
+        Date newDateFrom = bookingRequest.getDateFrom();
+        Date newDateTo = bookingRequest.getDateTo();
+
+        List<Booking> overlappingBookings = bookingRepository.findOverlappingActiveBookings(
+                vehicleId, newDateFrom, newDateTo);
+
+        if (!overlappingBookings.isEmpty()) {
+            throw new IllegalStateException("Vehicle is already booked during the requested period");
+        }
+
         Booking booking = bookingRepository.save(bookingMapper.toEntity(bookingRequest));
         return bookingMapper.toDto(booking);
     }

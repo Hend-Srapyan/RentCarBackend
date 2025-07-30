@@ -24,7 +24,7 @@ public class VehicleServiceImpl implements VehicleService {
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
 
-    @Value("C://Users//Hend//IdeaProjects//Rent-Car//upload")
+    @Value("${upload.path}")
     private String uploadPath;
 
     @Override

@@ -12,20 +12,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
-
-    @Override
-    public List<CustomerDto> findAll() {
-        List<Customer> customers = customerRepository.findAll();
-        return customerMapper.toDtoList(customers);
-    }
 
     @Override
     public Page<CustomerDto> findAll(Pageable pageable) {
